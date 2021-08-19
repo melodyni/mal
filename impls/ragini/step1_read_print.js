@@ -1,5 +1,6 @@
 const readline = require('readline');
 const { read_str } = require('./reader');
+const { pr_str } = require('./printer');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -7,8 +8,8 @@ const rl = readline.createInterface({
 });
 
 const READ = (str) => read_str(str);
-const EVAL = (str) => str;
-const PRINT = (str) => str.toString();
+const EVAL = (ast) => ast;
+const PRINT = (val) => pr_str(val);
 const rep = (str) => PRINT(EVAL(READ(str)));
 
 const main = () => {

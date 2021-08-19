@@ -1,4 +1,4 @@
-const { List, Vector } = require('./types');
+const { List, Vector, Str } = require('./types');
 
 class Reader {
   constructor(tokens) {
@@ -32,6 +32,9 @@ const read_atom = (reader) => {
   }
   if (token.match(/^-?[0-9][0-9.]*$/)) {
     return parseFloat(token);
+  }
+  if (token.match(/^"(?:\\.|[^\\"])*"$/)) {
+    return new Str(token.slice(1, -1));
   }
   if (token === true) {
     return true;
