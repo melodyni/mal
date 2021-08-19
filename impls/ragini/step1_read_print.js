@@ -8,7 +8,7 @@ const rl = readline.createInterface({
 
 const READ = (str) => read_str(str);
 const EVAL = (str) => str;
-const PRINT = (str) => str;
+const PRINT = (str) => str.toString();
 const rep = (str) => PRINT(EVAL(READ(str)));
 
 const main = () => {

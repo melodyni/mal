@@ -1,3 +1,5 @@
+const { List } = require('./types');
+
 class Reader {
   constructor(tokens) {
     this.tokens = tokens;
@@ -40,7 +42,7 @@ const read_list = function (reader) {
     ast.push(read_form(reader));
   }
   reader.next();
-  return ast;
+  return new List(ast);
 };
 
 const read_form = (reader) => {
