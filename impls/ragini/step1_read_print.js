@@ -13,8 +13,13 @@ const rep = (str) => PRINT(EVAL(READ(str)));
 
 const main = () => {
   rl.question('user> ', (str) => {
-    console.log(rep(str));
-    main();
+    try {
+      console.log(rep(str));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      main();
+    }
   });
 };
 

@@ -1,4 +1,4 @@
-const { List } = require('./types');
+const { List, Vector } = require('./types');
 
 class Reader {
   constructor(tokens) {
@@ -33,23 +33,50 @@ const read_atom = (reader) => {
   if (token.match(/^-?[0-9][0-9.]*$/)) {
     return parseFloat(token);
   }
+  if (token === true) {
+    return true;
+  }
+  if (token === false) {
+    return false;
+  }
+  return token;
 };
 
-const read_list = function (reader) {
+const read_seq = function (reader, closeSymbol) {
   const ast = [];
   reader.next();
-  while (reader.peek() != ')') {
+  while (reader.peek() != closeSymbol) {
+    if (reader.peek() === undefined) {
+      throw 'unbalanced';
+    }
     ast.push(read_form(reader));
   }
   reader.next();
+  return ast;
+};
+
+const read_list = function (reader) {
+  const ast = read_seq(reader, ')');
   return new List(ast);
+};
+
+const read_vector = function (reader) {
+  const ast = read_seq(reader, ']');
+  return new Vector(ast);
 };
 
 const read_form = (reader) => {
   const token = reader.peek();
 
-  if (token[0] == '(') {
-    return read_list(reader);
+  switch (token[0]) {
+    case '(':
+      return read_list(reader);
+    case '[':
+      return read_vector(reader);
+    case ')':
+      throw 'unbalanced )';
+    case ']':
+      throw 'unbalanced ]';
   }
   return read_atom(reader);
 };
