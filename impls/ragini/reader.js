@@ -40,6 +40,10 @@ const read_atom = (reader) => {
     return new Str(str);
   }
 
+  if(token.startsWith('"')){
+    throw "unbalanced \""
+  }
+
   if (token === true) {
     return true;
   }
