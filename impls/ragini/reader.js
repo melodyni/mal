@@ -1,4 +1,4 @@
-const { List, Vector, Str } = require('./types');
+const { List, Vector, Str, Keyword, MalSymbol } = require('./types');
 
 class Reader {
   constructor(tokens) {
@@ -30,19 +30,28 @@ const read_atom = (reader) => {
   if (token.match(/^-?[0-9]+$/)) {
     return parseInt(token);
   }
+
   if (token.match(/^-?[0-9][0-9.]*$/)) {
     return parseFloat(token);
   }
+
   if (token.match(/^"(?:\\.|[^\\"])*"$/)) {
     return new Str(token.slice(1, -1));
   }
+
   if (token === true) {
     return true;
   }
+
   if (token === false) {
     return false;
   }
-  return token;
+
+  if (token.startsWith(':')) {
+    return new Keyword(token.slice(1));
+  }
+
+  return new MalSymbol(token);
 };
 
 const read_seq = function (reader, closeSymbol) {
