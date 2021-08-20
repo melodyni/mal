@@ -1,4 +1,4 @@
-const { List, Vector, Str, Keyword, MalSymbol } = require('./types');
+const { List, Vector, Str, Keyword, MalSymbol, Hashmap } = require('./types');
 
 class Reader {
   constructor(tokens) {
@@ -36,7 +36,8 @@ const read_atom = (reader) => {
   }
 
   if (token.match(/^"(?:\\.|[^\\"])*"$/)) {
-    return new Str(token.slice(1, -1));
+    let str = token.slice(1, token.length - 1).replace(/\\(.)/g, function (_, c) { return c === 'n' ? '\n' : c });
+    return new Str(str);
   }
 
   if (token === true) {
@@ -77,6 +78,21 @@ const read_vector = function (reader) {
   return new Vector(ast);
 };
 
+const read_hashmap = (reader) => {
+  const ast = read_seq(reader, '}');
+  if (ast.length % 2 != 0) {
+    throw 'odd number of hashmap arguments';
+  }
+  const hashmap = new Map();
+  for (let i = 0; i < ast.length; i += 2) {
+    if (!(ast[i] instanceof Str)) {
+      throw 'hashmap key is not string';
+    }
+    hashmap.set(ast[i], ast[i + 1]);
+  }
+  return new Hashmap(hashmap);
+};
+
 const read_form = (reader) => {
   const token = reader.peek();
 
@@ -85,10 +101,14 @@ const read_form = (reader) => {
       return read_list(reader);
     case '[':
       return read_vector(reader);
+    case '{':
+      return read_hashmap(reader);
     case ')':
       throw 'unbalanced )';
     case ']':
       throw 'unbalanced ]';
+    case '}':
+      throw 'unbalanced }';
   }
   return read_atom(reader);
 };

@@ -1,12 +1,12 @@
 class MalValue {
-  pr_str() {
+  pr_str(print_readably = false) {
     return '*default mal val*';
   }
 }
 
-const pr_str = (val) => {
+const pr_str = (val, print_readably = false) => {
   if (val instanceof MalValue) {
-    return val.pr_str();
+    return val.pr_str(print_readably);
   }
   return val.toString();
 };
@@ -17,8 +17,8 @@ class List extends MalValue {
     this.ast = ast;
   }
 
-  pr_str() {
-    return '(' + this.ast.map((x) => pr_str(x)).join(' ') + ')';
+  pr_str(print_readably = false) {
+    return '(' + this.ast.map((x) => pr_str(x, print_readably)).join(' ') + ')';
   }
 }
 
@@ -28,8 +28,8 @@ class Vector extends MalValue {
     this.ast = ast;
   }
 
-  pr_str() {
-    return '[' + this.ast.map((x) => pr_str(x)).join(' ') + ']';
+  pr_str(print_readably = false) {
+    return '[' + this.ast.map((x) => pr_str(x, print_readably)).join(' ') + ']';
   }
 }
 
@@ -38,7 +38,7 @@ class NilValue extends MalValue {
     super();
   }
 
-  pr_str() {
+  pr_str(print_readably = false) {
     return 'nil';
   }
 }
@@ -51,7 +51,17 @@ class Str extends MalValue {
     this.string = string;
   }
 
-  pr_str() {
+  pr_str(print_readably = false) {
+    if (print_readably) {
+      return (
+        '"' +
+        this.string
+          .replace(/\\/g, '\\\\')
+          .replace(/"/g, '\\"')
+          .replace(/\n/g, '\\n') +
+        '"'
+      );
+    }
     return '"' + this.string + '"';
   }
 }
@@ -62,7 +72,7 @@ class Keyword extends MalValue {
     this.keyword = keyword;
   }
 
-  pr_str() {
+  pr_str(print_readably = false) {
     return ':' + this.keyword;
   }
 }
@@ -73,8 +83,24 @@ class MalSymbol extends MalValue {
     this.symbol = symbol;
   }
 
-  pr_str() {
+  pr_str(print_readably = false) {
     return this.symbol;
+  }
+}
+
+class Hashmap extends MalValue {
+  constructor(hashmap) {
+    super();
+    this.hashmap = hashmap;
+  }
+
+  pr_str(print_readably = false) {
+    let str = '';
+    let separator = '';
+    for (const [key, val] of this.hashmap.entries()) { 
+      str = str + separator + pr_str(key, print_readably) + ' ' + pr_str(val, print_readably); separator = ' '; 
+    } 
+    return '{' + str + '}';
   }
 }
 
@@ -86,5 +112,6 @@ module.exports = {
   Str,
   Keyword,
   MalSymbol,
+  Hashmap,
   pr_str,
 };
