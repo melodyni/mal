@@ -29,6 +29,13 @@ const eval_ast = (ast, env) => {
   if(ast instanceof Vector){
     return new Vector(ast.ast.map(x=> EVAL(x, env)))
   }
+  if(ast instanceof Hashmap){
+    const evaluatedMap = new Map();
+    for ([key, val] of ast.hashmap.entries()){
+      evaluatedMap.set(key, EVAL(val, env))
+    }
+    return new Hashmap(evaluatedMap)
+  }
   return ast
 };
 

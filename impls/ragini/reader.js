@@ -89,7 +89,7 @@ const read_hashmap = (reader) => {
   }
   const hashmap = new Map();
   for (let i = 0; i < ast.length; i += 2) {
-    if (!(ast[i] instanceof Str)) {
+    if (!(ast[i] instanceof Str || ast[i] instanceof Keyword)) {
       throw 'hashmap key is not string';
     }
     hashmap.set(ast[i], ast[i + 1]);
