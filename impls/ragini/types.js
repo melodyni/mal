@@ -17,6 +17,10 @@ class List extends MalValue {
     this.ast = ast;
   }
 
+  isEmpty(){
+    return this.ast.length == 0;
+  }
+  
   pr_str(print_readably = false) {
     return '(' + this.ast.map((x) => pr_str(x, print_readably)).join(' ') + ')';
   }
