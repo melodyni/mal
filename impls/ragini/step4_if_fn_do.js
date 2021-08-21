@@ -29,6 +29,7 @@ env.set(new MalSymbol('/'), (...args) => {
   return args.reduce((a, b) => a / b);
 });
 
+env.set(new MalSymbol('='), (a, b) => a == b);
 env.set(new MalSymbol('PI'), 3.14);
 
 const eval_ast = (ast, env) => {
@@ -85,11 +86,18 @@ const EVAL = (ast, env) => {
   }
 
   if (firstElement === 'if') {
-    const condition = EVAL(ast.ast[1], env);
-    if (condition === false || condition === Nil) {
+    const expr = EVAL(ast.ast[1], env);
+    if (expr === false || expr === Nil) {
       return EVAL(ast.ast[3], env);
     }
     return EVAL(ast.ast[2], env);
+  }
+
+  if (firstElement === 'fn*') {
+    return function (...exprs) {
+      const newEnv = Env.createEnv(env, ast.ast[1].ast, exprs);
+      return EVAL(ast.ast[2], newEnv);
+    };
   }
 
   [fn, ...args] = eval_ast(ast, env).ast;

@@ -28,6 +28,12 @@ class Env {
     }
     return env.data.get(key.symbol);
   }
+
+  static createEnv(outer = null, binds = [], exprs = []) {
+    const env = new Env(outer);
+    binds.forEach((symbol, index) => env.set(symbol, exprs[index]));
+    return env;
+  }
 }
 
 module.exports = Env;
