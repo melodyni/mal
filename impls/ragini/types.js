@@ -17,10 +17,10 @@ class List extends MalValue {
     this.ast = ast;
   }
 
-  isEmpty(){
+  isEmpty() {
     return this.ast.length == 0;
   }
-  
+
   pr_str(print_readably = false) {
     return '(' + this.ast.map((x) => pr_str(x, print_readably)).join(' ') + ')';
   }
@@ -101,10 +101,28 @@ class Hashmap extends MalValue {
   pr_str(print_readably = false) {
     let str = '';
     let separator = '';
-    for (const [key, val] of this.hashmap.entries()) { 
-      str = str + separator + pr_str(key, print_readably) + ' ' + pr_str(val, print_readably); separator = ' '; 
-    } 
+    for (const [key, val] of this.hashmap.entries()) {
+      str =
+        str +
+        separator +
+        pr_str(key, print_readably) +
+        ' ' +
+        pr_str(val, print_readably);
+      separator = ' ';
+    }
     return '{' + str + '}';
+  }
+}
+
+class Fn extends MalValue {
+  constructor(binds, fnBody, env) {
+    super();
+    this.binds = binds;
+    this.fnBody = fnBody;
+    this.env = env;
+  }
+  pr_str(print_readably = false) {
+    return '#<function>';
   }
 }
 
@@ -117,5 +135,6 @@ module.exports = {
   Keyword,
   MalSymbol,
   Hashmap,
+  Fn,
   pr_str,
 };
