@@ -66,7 +66,7 @@ class Str extends MalValue {
         '"'
       );
     }
-    return '"' + this.string + '"';
+    return this.string.toString();
   }
 }
 
@@ -126,6 +126,20 @@ class Fn extends MalValue {
   }
 }
 
+class Atom extends MalValue {
+  constructor(value){
+    super();
+    this.value = value;
+  }
+  pr_str(print_readably = false) {
+    return '(atom ' + pr_str(this.value, print_readably) + ")";
+  }
+  update(newValue){
+    this.value = newValue;
+    return this.value;
+  }
+}
+
 module.exports = {
   MalValue,
   List,
@@ -136,5 +150,6 @@ module.exports = {
   MalSymbol,
   Hashmap,
   Fn,
+  Atom,
   pr_str,
 };

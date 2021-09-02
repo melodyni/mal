@@ -1,3 +1,4 @@
+const { match } = require('assert');
 const { List, Vector, Str, Keyword, MalSymbol, Hashmap, Nil } = require('./types');
 
 class Reader {
@@ -22,7 +23,13 @@ class Reader {
 const tokenize = (str) => {
   re = /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)/g;
 
-  return [...str.matchAll(re)].map((x) => x[1]).slice(0, -1);
+  const tokens = [];
+  while((token = re.exec(str)[1]) !== ''){
+    if(token[0] !== ';'){
+      tokens.push(token)
+    }
+  }
+  return tokens
 };
 
 const read_atom = (reader) => {
@@ -42,6 +49,10 @@ const read_atom = (reader) => {
 
   if (token.startsWith('"')) {
     throw 'unbalanced "';
+  }
+
+  if (token.startsWith('@')) {
+    return new List([new MalSymbol('deref'), new MalSymbol(reader.next())])
   }
 
   if (token === 'true') {
