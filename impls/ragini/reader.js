@@ -1,5 +1,12 @@
-const { match } = require('assert');
-const { List, Vector, Str, Keyword, MalSymbol, Hashmap, Nil } = require('./types');
+const {
+  List,
+  Vector,
+  Str,
+  Keyword,
+  MalSymbol,
+  Hashmap,
+  Nil,
+} = require('./types');
 
 class Reader {
   constructor(tokens) {
@@ -24,12 +31,12 @@ const tokenize = (str) => {
   re = /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)/g;
 
   const tokens = [];
-  while((token = re.exec(str)[1]) !== ''){
-    if(token[0] !== ';'){
-      tokens.push(token)
+  while ((token = re.exec(str)[1]) !== '') {
+    if (token[0] !== ';') {
+      tokens.push(token);
     }
   }
-  return tokens
+  return tokens;
 };
 
 const read_atom = (reader) => {
@@ -43,16 +50,16 @@ const read_atom = (reader) => {
   }
 
   if (token.match(/^"(?:\\.|[^\\"])*"$/)) {
-    let str = token.slice(1, token.length - 1).replace(/\\(.)/g, function (_, c) { return c === 'n' ? '\n' : c });
+    let str = token
+      .slice(1, token.length - 1)
+      .replace(/\\(.)/g, function (_, c) {
+        return c === 'n' ? '\n' : c;
+      });
     return new Str(str);
   }
 
   if (token.startsWith('"')) {
     throw 'unbalanced "';
-  }
-
-  if (token.startsWith('@')) {
-    return new List([new MalSymbol('deref'), new MalSymbol(reader.next())])
   }
 
   if (token === 'true') {
@@ -112,16 +119,53 @@ const read_hashmap = (reader) => {
   return new Hashmap(hashmap);
 };
 
+const prependSymbol = (reader, symbolStr) => {
+  reader.next();
+  const symbol = new MalSymbol(symbolStr);
+  const newAst = read_form(reader);
+  return new List([symbol, newAst]);
+};
+
+const read_deref = (reader) => {
+  return prependSymbol(reader, 'deref');
+};
+
+const read_quote = (reader) => {
+  return prependSymbol(reader, 'quote');
+};
+
+const read_quasiquote = (reader) => {
+  return prependSymbol(reader, 'quasiquote');
+};
+
+const read_unquote = (reader) => {
+  return prependSymbol(reader, 'unquote');
+};
+
+const read_splice_unquote = (reader) => {
+  return prependSymbol(reader, 'splice-unquote');
+};
+
 const read_form = (reader) => {
   const token = reader.peek();
 
-  switch (token[0]) {
+  switch (token) {
     case '(':
       return read_list(reader);
     case '[':
       return read_vector(reader);
     case '{':
       return read_hashmap(reader);
+    case '@':
+      return read_deref(reader);
+    case "'":
+      return read_quote(reader);
+    case '`':
+      return read_quasiquote(reader);
+    case '~':
+      return read_unquote(reader);
+    case '~@':
+      return read_splice_unquote(reader);
     case ')':
       throw 'unbalanced )';
     case ']':
@@ -138,4 +182,4 @@ const read_str = (str) => {
   return read_form(reader);
 };
 
-module.exports = { read_str };
+module.exports = { read_str, prependSymbol };

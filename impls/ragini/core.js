@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { MalSymbol, Str, List, Nil, Atom } = require('./types');
+const { MalSymbol, Str, List, Nil, Atom, Vector } = require('./types');
 const { read_str } = require('./reader');
 const { pr_str } = require('./printer');
 const Env = require('./env');
@@ -62,7 +62,17 @@ core.set(new MalSymbol('slurp'), (filename) => {
 
 core.set(new MalSymbol('atom'), (malValue) => new Atom(malValue));
 core.set(new MalSymbol('atom?'), (arg) => arg instanceof Atom);
-core.set(new MalSymbol('deref'), (atom) => atom.value);
-core.set(new MalSymbol('reset!'), (atom, malValue) => atom.update(malValue));
+core.set(new MalSymbol('deref'), (atom) => atom.deref());
+core.set(new MalSymbol('reset!'), (atom, malValue) => atom.reset(malValue));
+
+core.set(new MalSymbol('cons'), (elem, seq) => seq.cons(elem));
+core.set(new MalSymbol('concat'), (...lists) => {
+  const list = new List([]);
+  return lists.reduce((a, b) => a.concat(b), list);
+});
+
+core.set(new MalSymbol('vec'), (seq) => {
+  return new Vector([...seq.ast]);
+});
 
 module.exports = { core };

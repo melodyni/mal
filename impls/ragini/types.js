@@ -21,6 +21,21 @@ class List extends MalValue {
     return this.ast.length == 0;
   }
 
+  cons(element) {
+    return new List([element, ...this.ast]);
+  }
+
+  concat(other) {
+    return new List([...this.ast.concat(other.ast)]);
+  }
+
+  beginsWith(str) {
+    if (this.ast[0]) {
+      return this.ast[0].symbol === str;
+    }
+    return false;
+  }
+
   pr_str(print_readably = false) {
     return '(' + this.ast.map((x) => pr_str(x, print_readably)).join(' ') + ')';
   }
@@ -30,6 +45,14 @@ class Vector extends MalValue {
   constructor(ast) {
     super();
     this.ast = ast;
+  }
+
+  cons(element) {
+    return new List([element, ...this.ast]);
+  }
+
+  concat(other) {
+    return new List([...this.ast.concat(other.ast)]);
   }
 
   pr_str(print_readably = false) {
@@ -121,22 +144,26 @@ class Fn extends MalValue {
     this.fnBody = fnBody;
     this.env = env;
   }
+
   pr_str(print_readably = false) {
     return '#<function>';
   }
 }
 
 class Atom extends MalValue {
-  constructor(value){
+  constructor(value) {
     super();
     this.value = value;
   }
-  pr_str(print_readably = false) {
-    return '(atom ' + pr_str(this.value, print_readably) + ")";
+  deref() {
+    return this.value;
   }
-  update(newValue){
+  reset(newValue) {
     this.value = newValue;
     return this.value;
+  }
+  pr_str(print_readably = false) {
+    return '(atom ' + pr_str(this.value, print_readably) + ')';
   }
 }
 
