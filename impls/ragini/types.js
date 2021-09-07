@@ -11,14 +11,17 @@ const pr_str = (val, print_readably = false) => {
   return val.toString();
 };
 
-class List extends MalValue {
+class Sequence extends MalValue {
   constructor(ast) {
     super();
     this.ast = ast;
   }
-
   isEmpty() {
-    return this.ast.length == 0;
+    return this.ast.length === 0;
+  }
+
+  count() {
+    return this.ast.length;
   }
 
   cons(element) {
@@ -29,11 +32,29 @@ class List extends MalValue {
     return new List([...this.ast.concat(other.ast)]);
   }
 
-  beginsWith(str) {
-    if (this.ast[0]) {
-      return this.ast[0].symbol === str;
+  beginsWith(symbol) {
+    if (!this.isEmpty()) {
+      return this.ast[0].symbol === symbol;
     }
     return false;
+  }
+  equals(other) {
+    if (!(other instanceof Sequence) || this.count() !== other.count()) {
+      return false;
+    }
+    return this.ast.every((elt, index) => {
+      if (elt instanceof MalValue) {
+        return elt.equals(other.ast[index]);
+      }
+      return other.ast[index] === elt;
+    });
+  }
+}
+
+class List extends Sequence {
+  constructor(ast) {
+    super();
+    this.ast = ast;
   }
 
   pr_str(print_readably = false) {
@@ -41,18 +62,10 @@ class List extends MalValue {
   }
 }
 
-class Vector extends MalValue {
+class Vector extends Sequence {
   constructor(ast) {
     super();
     this.ast = ast;
-  }
-
-  cons(element) {
-    return new List([element, ...this.ast]);
-  }
-
-  concat(other) {
-    return new List([...this.ast.concat(other.ast)]);
   }
 
   pr_str(print_readably = false) {
@@ -67,6 +80,10 @@ class NilValue extends MalValue {
 
   pr_str(print_readably = false) {
     return 'nil';
+  }
+
+  equals(other) {
+    return other instanceof NilValue;
   }
 }
 
@@ -91,6 +108,12 @@ class Str extends MalValue {
     }
     return this.string.toString();
   }
+  equals(other) {
+    if (other instanceof Str) {
+      return other.string === this.string;
+    }
+    return false;
+  }
 }
 
 class Keyword extends MalValue {
@@ -102,6 +125,12 @@ class Keyword extends MalValue {
   pr_str(print_readably = false) {
     return ':' + this.keyword;
   }
+  equals(other) {
+    if (other instanceof Keyword) {
+      return other.keyword === this.keyword;
+    }
+    return false;
+  }
 }
 
 class MalSymbol extends MalValue {
@@ -112,6 +141,12 @@ class MalSymbol extends MalValue {
 
   pr_str(print_readably = false) {
     return this.symbol;
+  }
+  equals(other) {
+    if (other instanceof MalSymbol) {
+      return other.symbol === this.symbol;
+    }
+    return false;
   }
 }
 

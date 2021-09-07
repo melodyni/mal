@@ -132,10 +132,10 @@ const EVAL = (ast, core) => {
 };
 
 const quasiquote = (ast) => {
-  if (ast instanceof List && ast.beginsWith('unquote')) {
-    return ast.ast[1];
-  }
   if (ast instanceof List) {
+    if (ast.beginsWith('unquote')) {
+      return ast.ast[1];
+    }
     let result = new List([]);
     for (let i = ast.ast.length - 1; i >= 0; i--) {
       const elt = ast.ast[i];

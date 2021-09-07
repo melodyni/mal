@@ -1,5 +1,13 @@
 const fs = require('fs');
-const { MalSymbol, Str, List, Nil, Atom, Vector } = require('./types');
+const {
+  MalSymbol,
+  Str,
+  List,
+  Nil,
+  Atom,
+  Vector,
+  MalValue,
+} = require('./types');
 const { read_str } = require('./reader');
 const { pr_str } = require('./printer');
 const Env = require('./env');
@@ -24,11 +32,19 @@ core.set(new MalSymbol('/'), (...args) => {
   return args.reduce((a, b) => a / b);
 });
 
-core.set(new MalSymbol('='), (a, b) => a == b);
+core.set(new MalSymbol('='), (a, b) => {
+  if (a instanceof MalValue) {
+    return a.equals(b);
+  }
+  return a === b;
+});
 
 core.set(new MalSymbol('PI'), 3.14);
 
 core.set(new MalSymbol('<='), (a, b) => a <= b);
+core.set(new MalSymbol('<'), (a, b) => a < b);
+core.set(new MalSymbol('>='), (a, b) => a >= b);
+core.set(new MalSymbol('>'), (a, b) => a > b);
 
 core.set(new MalSymbol('inc'), (a) => a + 1);
 
@@ -40,8 +56,14 @@ core.set(
 );
 
 core.set(new MalSymbol('list'), (...args) => new List(args));
-
 core.set(new MalSymbol('list?'), (arg) => arg instanceof List);
+core.set(new MalSymbol('empty?'), (seq) => seq.isEmpty());
+core.set(new MalSymbol('count'), (seq) => {
+  if (seq instanceof List || seq instanceof Vector) {
+    return seq.count();
+  }
+  return 0;
+});
 
 core.set(new MalSymbol('prn'), (...args) => {
   console.log(args.reduce((str, arg) => str + pr_str(arg, true), ''));
