@@ -67,6 +67,9 @@ const EVAL = (ast, core) => {
   if (firstElement === 'if') {
     const expr = EVAL(ast.ast[1], core);
     if (expr === false || expr === Nil) {
+      if (ast.ast[3] === undefined) {
+        return Nil;
+      }
       return EVAL(ast.ast[3], core);
     }
     return EVAL(ast.ast[2], core);
@@ -89,6 +92,8 @@ const EVAL = (ast, core) => {
 const READ = (str) => read_str(str);
 const PRINT = (val) => pr_str(val, true);
 const rep = (str) => PRINT(EVAL(READ(str), core));
+
+rep('(def! not (fn* [x] (if x false true)))');
 
 const main = () => {
   rl.question('user> ', (str) => {
