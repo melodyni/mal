@@ -20,6 +20,24 @@ class Sequence extends MalValue {
     return this.ast.length === 0;
   }
 
+  nth(n) {
+    if (n >= this.count()) {
+      throw 'Index Out of Bounds';
+    }
+    return this.ast[n];
+  }
+
+  first(n) {
+    if (this.count() === 0) {
+      return Nil;
+    }
+    return this.ast[0];
+  }
+
+  rest(n) {
+    return this.ast.slice(1);
+  }
+
   count() {
     return this.ast.length;
   }
@@ -56,7 +74,6 @@ class List extends Sequence {
     super();
     this.ast = ast;
   }
-
   pr_str(print_readably = false) {
     return '(' + this.ast.map((x) => pr_str(x, print_readably)).join(' ') + ')';
   }
@@ -67,7 +84,6 @@ class Vector extends Sequence {
     super();
     this.ast = ast;
   }
-
   pr_str(print_readably = false) {
     return '[' + this.ast.map((x) => pr_str(x, print_readably)).join(' ') + ']';
   }
@@ -173,11 +189,17 @@ class Hashmap extends MalValue {
 }
 
 class Fn extends MalValue {
-  constructor(binds, fnBody, env) {
+  constructor(binds, fnBody, env, fn, isMacro = false) {
     super();
     this.binds = binds;
     this.fnBody = fnBody;
+    this.fn = fn;
     this.env = env;
+    this.isMacro = isMacro;
+  }
+
+  apply(args) {
+    return this.fn.apply(null, args);
   }
 
   pr_str(print_readably = false) {
@@ -214,4 +236,5 @@ module.exports = {
   Fn,
   Atom,
   pr_str,
+  NilValue,
 };

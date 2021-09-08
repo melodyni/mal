@@ -7,6 +7,7 @@ const {
   Atom,
   Vector,
   MalValue,
+  NilValue,
 } = require('./types');
 const { read_str } = require('./reader');
 const { pr_str } = require('./printer');
@@ -50,14 +51,24 @@ core.set(new MalSymbol('inc'), (a) => a + 1);
 
 core.set(new MalSymbol('PI'), 3.14);
 
-core.set(
-  new MalSymbol('str'),
-  (...args) => new Str(args.reduce((str, arg) => str + pr_str(arg, false), ''))
-);
-
 core.set(new MalSymbol('list'), (...args) => new List(args));
 core.set(new MalSymbol('list?'), (arg) => arg instanceof List);
 core.set(new MalSymbol('empty?'), (seq) => seq.isEmpty());
+core.set(new MalSymbol('nth'), (seq, n) => seq.nth(n));
+core.set(new MalSymbol('first'), (seq) => {
+  if (seq instanceof NilValue) {
+    return Nil;
+  }
+  return seq.first();
+});
+
+core.set(new MalSymbol('rest'), (seq) => {
+  if (seq instanceof NilValue) {
+    return new List([]);
+  }
+  return new List(seq.rest());
+});
+
 core.set(new MalSymbol('count'), (seq) => {
   if (seq instanceof List || seq instanceof Vector) {
     return seq.count();
@@ -65,8 +76,22 @@ core.set(new MalSymbol('count'), (seq) => {
   return 0;
 });
 
+core.set(
+  new MalSymbol('str'),
+  (...args) => new Str(args.reduce((str, arg) => str + pr_str(arg, false), ''))
+);
+
+core.set(new MalSymbol('pr-str'), (...args) => {
+  return new Str(args.map((ast) => pr_str(ast, true)).join(' '));
+});
+
 core.set(new MalSymbol('prn'), (...args) => {
-  console.log(args.reduce((str, arg) => str + pr_str(arg, true), ''));
+  console.log(args.map((ast) => pr_str(ast, true)).join(' '));
+  return Nil;
+});
+
+core.set(new MalSymbol('println'), (...args) => {
+  console.log(args.map((ast) => pr_str(ast, false)).join(' '));
   return Nil;
 });
 
